@@ -98,5 +98,73 @@ export const Editor = {
     });
     canvas.addEventListener('mouseup', () => { dragging = null; });
     canvas.addEventListener('mouseleave', () => { dragging = null; });
+
+    const menu = document.getElementById('ctx-menu');
+    function hideMenu() { menu.style.display = 'none'; menu.innerHTML = ''; }
+
+    function entityAt(state, r, c) {
+      // returns array of {kind, ref} for all entities covering (r,c)
+      const hits = [];
+      // player 2x2
+      for (const p of state.players) {
+        const pc = state.placement[p.id];
+        if (pc && r >= pc[0] && r <= pc[0]+1 && c >= pc[1] && c <= pc[1]+1) hits.push({ kind: 'player', ref: p });
+      }
+      // banner 1x1
+      const bn = (state.banners || []).find(b => b.row === r && b.col === c);
+      if (bn) hits.push({ kind: 'banner', ref: bn });
+      // obstacle 1x1
+      for (const o of state.obstacles) {
+        if (o.cells.some(cc => cc[0] === r && cc[1] === c)) { hits.push({ kind: 'obstacle', ref: { group: o, r, c } }); break; }
+      }
+      // bear 3x3 — not deletable, skip
+      return hits;
+    }
+
+    function deleteEntity(state, hit) {
+      if (hit.kind === 'player') {
+        const idx = state.players.indexOf(hit.ref);
+        if (idx >= 0) state.players.splice(idx, 1);
+        delete state.placement[hit.ref.id];
+      } else if (hit.kind === 'banner') {
+        const idx = state.banners.indexOf(hit.ref);
+        if (idx >= 0) state.banners.splice(idx, 1);
+      } else if (hit.kind === 'obstacle') {
+        const o = hit.ref.group;
+        const idx = o.cells.findIndex(cc => cc[0] === hit.ref.r && cc[1] === hit.ref.c);
+        if (idx >= 0) o.cells.splice(idx, 1);
+      }
+    }
+
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const cellSize = getCellSize();
+      const view = getView();
+      const [r, c] = cellFromEvent(e, canvas, view, cellSize);
+      const state = store.get();
+      const hits = entityAt(state, r, c);
+      if (hits.length === 0) { hideMenu(); return; }
+      const labels = { player: '玩家', banner: '旗帜', obstacle: '障碍' };
+      menu.innerHTML = '';
+      hits.forEach(hit => {
+        const item = document.createElement('div');
+        item.textContent = '删除' + labels[hit.kind] + (hit.kind === 'player' ? '（' + (hit.ref.name || '') + '）' : '');
+        item.style.cssText = 'padding:6px 12px;cursor:pointer';
+        item.addEventListener('mouseenter', () => item.style.background = '#e5e7eb');
+        item.addEventListener('mouseleave', () => item.style.background = '#fff');
+        item.addEventListener('click', () => {
+          store.push();
+          deleteEntity(store.get(), hit);
+          hideMenu();
+          requestRender();
+        });
+        menu.appendChild(item);
+      });
+      menu.style.left = e.pageX + 'px';
+      menu.style.top = e.pageY + 'px';
+      menu.style.display = 'block';
+    });
+    document.addEventListener('click', hideMenu);
+    document.addEventListener('mousedown', (e) => { if (e.target !== menu && !menu.contains(e.target)) hideMenu(); });
   }
 };

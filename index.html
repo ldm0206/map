@@ -4,57 +4,137 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>熊坑排座</title>
-  <style>
-    body { margin: 0; font-family: system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-    #topbar { display: flex; gap: 8px; padding: 8px; background: #1f2937; color: #fff; }
-    #main { display: flex; flex: 1; overflow: hidden; }
-    #leftbar { width: 140px; padding: 8px; background: #f3f4f6; overflow-y: auto; }
-    #canvas-wrap { flex: 1; overflow: auto; background: #e5e7eb; }
-    #rightbar { width: 280px; padding: 8px; background: #f3f4f6; overflow-y: auto; }
-    .tool { display: block; width: 100%; margin-bottom: 4px; padding: 6px; text-align: left; }
-    .tool.active { background: #3b82f6; color: #fff; }
-    #player-list { list-style: none; padding: 0; margin: 8px 0; }
-    #player-list li { display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid #d1d5db; margin-bottom: 2px; background: #fff; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="topbar">
-    <b>熊坑排座</b>
-    <button id="btn-load">加载项目</button>
-    <button id="btn-save">导出项目</button>
-    <button id="btn-final">最终图</button>
-    <button id="btn-changes">变动图</button>
-    <button id="btn-reset">重置</button>
-    <input id="zoom" type="range" min="20" max="80" value="40">
-  </div>
+  <header id="topbar">
+    <div class="topbar-brand">熊坑排座</div>
+    <div class="topbar-divider"></div>
+
+    <div class="topbar-group">
+      <button id="btn-load" class="btn btn-ghost" data-tip="加载项目 JSON">加载项目</button>
+      <button id="btn-save" class="btn btn-ghost" data-tip="导出项目 JSON">导出项目</button>
+    </div>
+
+    <div class="topbar-divider"></div>
+
+    <div class="topbar-group">
+      <button id="btn-final" class="btn btn-ghost" data-tip="导出最终排位图 PNG">最终图</button>
+      <button id="btn-changes" class="btn btn-ghost" data-tip="导出座位变动图 PNG">变动图</button>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="zoom-wrap">
+      <span>缩放</span>
+      <input id="zoom" type="range" min="20" max="80" value="40">
+      <span class="zoom-value" id="zoom-value">40px</span>
+    </div>
+
+    <div class="topbar-divider"></div>
+
+    <button id="btn-reset" class="btn btn-danger" data-tip="清空所有数据,谨慎操作">重置</button>
+  </header>
+
   <div id="main">
-    <div id="leftbar">
-      <div>工具</div>
-      <button class="tool" data-tool="bear">熊坑</button>
-      <button class="tool" data-tool="banner">旗帜</button>
-      <button class="tool" data-tool="mountain">山</button>
-      <button class="tool" data-tool="lake">湖</button>
-      <button class="tool" data-tool="mine">矿</button>
-      <button class="tool" data-tool="player">手动放玩家</button>
+    <aside id="leftbar">
+      <div class="panel-section">
+        <h2 class="panel-title">建造</h2>
+        <button class="tool active" data-tool="bear" data-tip="拖动放置 3×3 熊坑">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/></svg>
+          </span>
+          <span class="tool-name">熊坑</span>
+        </button>
+        <button class="tool" data-tool="banner" data-tip="点空格新建,点已有删除,Shift+点锁定">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2v12M4 3h8l-2 3 2 3H4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="tool-name">旗帜</span>
+          <span class="tool-tag">7×7</span>
+        </button>
+      </div>
+
+      <div class="panel-section">
+        <h2 class="panel-title">障碍</h2>
+        <button class="tool" data-tool="mountain" data-tip="点格子切换山体">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 13 L6 4 L9 9 L11 6 L14 13 Z" fill="currentColor"/></svg>
+          </span>
+          <span class="tool-name">山</span>
+        </button>
+        <button class="tool" data-tool="lake" data-tip="点格子切换湖泊">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2 C8 2 3 8 3 11 a5 5 0 0 0 10 0 C13 8 8 2 8 2 Z" fill="currentColor"/></svg>
+          </span>
+          <span class="tool-name">湖</span>
+        </button>
+        <button class="tool" data-tool="mine" data-tip="点格子切换矿点">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5 L10 8 L8 11 L6 8 Z" fill="currentColor"/></svg>
+          </span>
+          <span class="tool-name">矿</span>
+        </button>
+      </div>
+
+      <div class="panel-section">
+        <h2 class="panel-title">玩家</h2>
+        <button class="tool" data-tool="player" data-tip="先在右侧点选玩家,再点地图放置">
+          <span class="tool-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="2.5" fill="currentColor"/><path d="M3 14 c0-3 2.5-5 5-5 s5 2 5 5 Z" fill="currentColor"/></svg>
+          </span>
+          <span class="tool-name">手动放玩家</span>
+        </button>
+      </div>
+
+      <div class="leftbar-actions">
+        <button id="btn-undo" class="icon-btn" data-tip="撤销" aria-label="撤销">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M6 4 L2 8 L6 12 V9 h5 a3 3 0 0 1 3 3 v1 h-1.5 v-1 a1.5 1.5 0 0 0 -1.5 -1.5 H6 Z" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-redo" class="icon-btn" data-tip="重做" aria-label="重做">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10 4 L14 8 L10 12 V9 h-5 a3 3 0 0 0 -3 3 v1 h1.5 v-1 a1.5 1.5 0 0 1 1.5 -1.5 H10 Z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main id="canvas-wrap">
+      <div id="canvas-card">
+        <canvas id="canvas"></canvas>
+      </div>
+    </main>
+
+    <aside id="rightbar">
+      <div class="panel-section">
+        <h2 class="panel-title">玩家优先级</h2>
+        <p class="panel-subtitle">顶部最高 · 拖拽调整顺序 · 点选后可在地图上手动放置</p>
+        <ul id="player-list"></ul>
+      </div>
+
+      <button id="btn-import-names" class="btn btn-secondary btn-block">批量导入名单</button>
+
       <hr>
-      <button id="btn-undo">撤销</button>
-      <button id="btn-redo">重做</button>
-    </div>
-    <div id="canvas-wrap">
-      <canvas id="canvas"></canvas>
-    </div>
-    <div id="rightbar">
-      <div>玩家优先级（顶部最高）</div>
-      <ul id="player-list"></ul>
-      <button id="btn-import-names">批量导入名单</button>
-      <hr>
-      <div>模式</div>
-      <label><input type="radio" name="mode" value="strict" checked> 严格</label>
-      <label><input type="radio" name="mode" value="minimal"> 最小修改</label>
-      <button id="btn-solve">一键排位</button>
-      <button id="btn-clear">清空排位</button>
-    </div>
+
+      <div class="panel-section">
+        <h2 class="panel-title">排位模式</h2>
+        <div class="mode-cards">
+          <label class="mode-card selected" data-mode-card="strict">
+            <input type="radio" name="mode" value="strict" checked>
+            <span class="mode-name">严格</span>
+            <span class="mode-desc">贪心算法</span>
+          </label>
+          <label class="mode-card" data-mode-card="minimal">
+            <input type="radio" name="mode" value="minimal">
+            <span class="mode-name">最小修改</span>
+            <span class="mode-desc">匈牙利算法</span>
+          </label>
+        </div>
+      </div>
+
+      <button id="btn-solve" class="btn btn-primary btn-block">一键排位</button>
+      <button id="btn-clear" class="btn btn-ghost btn-block">清空排位</button>
+    </aside>
   </div>
+
   <input id="file-input" type="file" accept=".json" style="display:none">
   <script type="module" src="js/ui.js"></script>
 </body>

@@ -31,13 +31,15 @@ export const Renderer = {
     const toPx = (r, c) => [(c - view.minCol) * cell, (r - view.minRow) * cell];
 
     // coverage highlight
-    const cov = Geometry.bannerCoverage(state.banner);
-    let [cx, cy] = toPx(cov.minRow, cov.minCol);
-    ctx.fillStyle = COLORS.coverage;
-    ctx.fillRect(cx, cy, 7 * cell, 7 * cell);
-    ctx.strokeStyle = COLORS.coverageBorder;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx, cy, 7 * cell, 7 * cell);
+    for (const bn of state.banners || []) {
+      const cov = Geometry.bannerCoverage(bn);
+      let [cx, cy] = toPx(cov.minRow, cov.minCol);
+      ctx.fillStyle = COLORS.coverage;
+      ctx.fillRect(cx, cy, 7 * cell, 7 * cell);
+      ctx.strokeStyle = COLORS.coverageBorder;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cx, cy, 7 * cell, 7 * cell);
+    }
 
     // grid
     ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 0.5;
@@ -66,13 +68,17 @@ export const Renderer = {
     ctx.fillText('熊', bx + 1.5 * cell, by + 1.5 * cell);
 
     // banner
-    let [fx, fy] = toPx(state.banner.row, state.banner.col);
-    ctx.fillStyle = COLORS.banner;
-    ctx.fillRect(fx, fy, cell, cell);
-    ctx.fillStyle = '#000'; ctx.fillText('旗', fx + cell / 2, fy + cell / 2);
-    if (state.banner.fixed) {
-      ctx.strokeStyle = COLORS.fixed; ctx.lineWidth = 3;
-      ctx.strokeRect(fx, fy, cell, cell);
+    for (const bn of state.banners || []) {
+      let [fx, fy] = toPx(bn.row, bn.col);
+      ctx.fillStyle = COLORS.banner;
+      ctx.fillRect(fx, fy, cell, cell);
+      ctx.fillStyle = '#000'; ctx.font = `${cell * 0.4}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('旗', fx + cell / 2, fy + cell / 2);
+      if (bn.fixed) {
+        ctx.strokeStyle = COLORS.fixed; ctx.lineWidth = 3;
+        ctx.strokeRect(fx, fy, cell, cell);
+      }
     }
 
     // players

@@ -9,7 +9,7 @@ function cellFromEvent(e, canvas, view, cellSize) {
 }
 
 export const Editor = {
-  init(canvas, store, getTool, requestRender, getCellSize, getView) {
+  init(canvas, store, getTool, requestRender, getCellSize, getView, getSelectedPlayer, onPlayerPlaced) {
     let dragging = null;
 
     canvas.addEventListener('mousedown', (e) => {
@@ -68,12 +68,16 @@ export const Editor = {
           hitPlayer.fixed = false;
           hitPlayer.fixedCell = null;
         } else {
-          const firstUnfixed = state.players.find(p => !p.fixed && !state.placement[p.id]);
-          if (firstUnfixed && Geometry.canPlaceEntity(state, fixedCells, 'player', [r, c])) {
+          const sel = getSelectedPlayer ? getSelectedPlayer() : null;
+          const target = (sel && !sel.fixed && !state.placement[sel.id])
+            ? sel
+            : state.players.find(p => !p.fixed && !state.placement[p.id]);
+          if (target && Geometry.canPlaceEntity(state, fixedCells, 'player', [r, c])) {
             store.push();
-            state.placement[firstUnfixed.id] = [r, c];
-            firstUnfixed.fixed = true;
-            firstUnfixed.fixedCell = [r, c];
+            state.placement[target.id] = [r, c];
+            target.fixed = true;
+            target.fixedCell = [r, c];
+            if (onPlayerPlaced) onPlayerPlaced();
           }
         }
       }

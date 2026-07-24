@@ -10,6 +10,7 @@ const store = Store.create();
 let tool = 'bear';
 let cellSize = 40;
 let lastOldPlacement = {};
+let selectedPlayerId = null;
 
 const canvas = document.getElementById('canvas');
 const $ = (id) => document.getElementById(id);
@@ -34,6 +35,7 @@ function renderPlayerList() {
     const li = document.createElement('li');
     li.draggable = true;
     li.dataset.id = p.id;
+    if (p.id === selectedPlayerId) li.style.background = '#bfdbfe';
     li.innerHTML = `<span>${i + 1}.</span><input value="${p.name}" data-id="${p.id}" class="pname" style="flex:1">
       <input type="checkbox" data-id="${p.id}" class="pfix" ${p.fixed ? 'checked' : ''}>
       <button data-id="${p.id}" class="pdel">×</button>`;
@@ -42,6 +44,11 @@ function renderPlayerList() {
   // drag to reorder
   let dragId = null;
   ul.querySelectorAll('li').forEach(li => {
+    li.addEventListener('click', (e) => {
+      if (e.target.closest('input, button')) return; // ignore clicks on name/checkbox/delete
+      selectedPlayerId = (selectedPlayerId === li.dataset.id) ? null : li.dataset.id;
+      render();
+    });
     li.addEventListener('dragstart', () => dragId = li.dataset.id);
     li.addEventListener('dragover', (e) => e.preventDefault());
     li.addEventListener('drop', () => {
@@ -74,11 +81,15 @@ function renderPlayerList() {
     store.push();
     const [removed] = state.players.splice(idx, 1);
     delete state.placement[removed.id];
+    if (selectedPlayerId === removed.id) selectedPlayerId = null;
     render();
   }));
 }
 
-Editor.init(canvas, store, () => tool, render, () => cellSize, getView);
+Editor.init(canvas, store, () => tool, render, () => cellSize, getView, () => {
+  const p = store.get().players.find(p => p.id === selectedPlayerId);
+  return p || null;
+}, () => { selectedPlayerId = null; }); // onPlayerPlaced: clear selection after a manual place
 
 document.querySelectorAll('.tool').forEach(b => b.addEventListener('click', () => {
   tool = b.dataset.tool;

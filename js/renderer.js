@@ -1,17 +1,18 @@
 import { Geometry } from './geometry.js';
 
 const COLORS = {
-  grid: '#9ca3af',
-  bear: '#7c2d12',
-  banner: '#facc15',
-  coverage: 'rgba(250, 204, 21, 0.12)',
-  coverageBorder: '#eab308',
-  mountain: '#78716c',
-  lake: '#0ea5e9',
-  mine: '#a16207',
-  player: '#3b82f6',
-  fixed: '#f59e0b',
-  text: '#000'
+  grid: '#D6CDBB',
+  bear: '#8A3B2A',
+  banner: '#D4A24E',
+  coverage: 'rgba(212, 162, 78, 0.10)',
+  coverageBorder: '#C08A35',
+  mountain: '#8B8075',
+  lake: '#7A9AB5',
+  mine: '#9C6F3A',
+  player: '#C15A3C',
+  playerBorder: '#7A3524',
+  fixed: '#D4A24E',
+  text: '#1F1A14'
 };
 
 export const Renderer = {
@@ -90,7 +91,7 @@ export const Renderer = {
       ctx.globalAlpha = 0.7;
       ctx.fillRect(x, y, 2 * cell, 2 * cell);
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1;
+      ctx.strokeStyle = COLORS.playerBorder; ctx.lineWidth = 1;
       ctx.strokeRect(x, y, 2 * cell, 2 * cell);
       ctx.fillStyle = COLORS.text; ctx.font = `${cell * 0.25}px sans-serif`;
       ctx.fillText(p.name, x + cell, y + cell * 0.5);

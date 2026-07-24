@@ -2,7 +2,7 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 
 const initial = () => ({
   bear: { row: 0, col: 0 },
-  banner: { row: 3, col: 0, fixed: false },
+  banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
   obstacles: [],
   players: [],
   placement: {},

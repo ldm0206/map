@@ -7,7 +7,8 @@ test('initial state defaults', () => {
   const st = s.get();
   assert.equal(st.mode, 'strict');
   assert.deepEqual(st.bear, { row: 0, col: 0 });
-  assert.equal(st.banner.fixed, false);
+  assert.equal(st.banners.length, 1);
+  assert.equal(st.banners[0].fixed, false);
   assert.equal(s.canUndo(), false);
 });
 

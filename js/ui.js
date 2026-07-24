@@ -35,10 +35,16 @@ function renderPlayerList() {
     const li = document.createElement('li');
     li.draggable = true;
     li.dataset.id = p.id;
-    if (p.id === selectedPlayerId) li.style.background = '#bfdbfe';
-    li.innerHTML = `<span>${i + 1}.</span><input value="${p.name}" data-id="${p.id}" class="pname" style="flex:1">
-      <input type="checkbox" data-id="${p.id}" class="pfix" ${p.fixed ? 'checked' : ''}>
-      <button data-id="${p.id}" class="pdel">×</button>`;
+    if (p.id === selectedPlayerId) li.classList.add('selected');
+    const seated = Boolean(state.placement[p.id]);
+    const badgeClass = p.fixed ? 'badge-fixed' : (seated ? 'badge-seated' : 'badge-unseated');
+    const badgeText  = p.fixed ? '固定'     : (seated ? '已落座'     : '未落座');
+    li.innerHTML = `<span class="drag-handle" aria-hidden="true">⋮⋮</span>
+      <span class="player-rank">${i + 1}</span>
+      <span class="player-name-wrap"><input value="${p.name}" data-id="${p.id}" class="pname"></span>
+      <span class="badge ${badgeClass}">${badgeText}</span>
+      <input type="checkbox" data-id="${p.id}" class="pfix" title="固定" ${p.fixed ? 'checked' : ''}>
+      <button data-id="${p.id}" class="pdel" title="删除玩家">×</button>`;
     ul.appendChild(li);
   });
   // drag to reorder
@@ -112,8 +118,16 @@ $('btn-import-names').addEventListener('click', () => {
 });
 document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', (e) => {
   store.get().mode = e.target.value;
+  document.querySelectorAll('.mode-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.modeCard === e.target.value);
+  });
 }));
-$('zoom').addEventListener('input', (e) => { cellSize = +e.target.value; render(); });
+$('zoom').addEventListener('input', (e) => {
+  cellSize = +e.target.value;
+  const zv = $('zoom-value');
+  if (zv) zv.textContent = e.target.value + 'px';
+  render();
+});
 
 $('btn-solve').addEventListener('click', () => {
   const state = store.get();

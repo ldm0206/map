@@ -84,15 +84,13 @@ export const Editor = {
       const state = store.get();
       const fixedCells = state.players.filter(p => p.fixed && p.fixedCell).map(p => p.fixedCell);
       if (dragging.type === 'bear') {
-        if (Geometry.canPlaceEntity(state, fixedCells, 'bear', [r, c])) {
+        if (Geometry.canPlaceEntity(state, fixedCells, 'bear', [r, c], { ignoreSelf: { kind: 'bear', cell: [state.bear.row, state.bear.col] } })) {
           state.bear.row = r; state.bear.col = c;
         }
       } else if (dragging.type === 'banner') {
         // temporarily move banner, check overlap excluding itself
         const bn = state.banners.find(b => b.id === dragging.id);
-        if (bn && Geometry.canPlaceEntity(state, fixedCells, 'banner', [r, c])) {
-          // canPlaceEntity includes this banner's own cell in occupiedCells (it's in state.banners),
-          // so a 1-cell move to an adjacent free cell is allowed; moving onto its own current cell is also allowed.
+        if (bn && Geometry.canPlaceEntity(state, fixedCells, 'banner', [r, c], { ignoreSelf: { kind: 'banner', cell: [bn.row, bn.col] } })) {
           bn.row = r; bn.col = c;
         }
       }

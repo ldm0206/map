@@ -118,15 +118,25 @@ export const Geometry = {
     return occ;
   },
 
-  canPlaceEntity(state, occupiedByFixed, kind, cell, opts) {
+  _footprint(kind, cell) {
     const [r, c] = cell;
-    const occ = this.occupiedCells(state, occupiedByFixed);
     const cells = [];
     if (kind === 'banner' || kind === 'obstacle') cells.push([r, c]);
-    else if (kind === 'player') cells.push([r,c],[r,c+1],[r+1,c],[r+1,c+1]);
+    else if (kind === 'player') cells.push([r, c], [r, c + 1], [r + 1, c], [r + 1, c + 1]);
     else if (kind === 'bear') {
-      for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push([r+dr, c+dc]);
-    } else return false;
+      for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push([r + dr, c + dc]);
+    }
+    return cells;
+  },
+
+  canPlaceEntity(state, occupiedByFixed, kind, cell, opts) {
+    const occ = this.occupiedCells(state, occupiedByFixed);
+    if (opts && opts.ignoreSelf) {
+      const { kind: ikind, cell: icell } = opts.ignoreSelf;
+      for (const [rr, cc] of this._footprint(ikind, icell)) occ.delete(`${rr},${cc}`);
+    }
+    const cells = this._footprint(kind, cell);
+    if (cells.length === 0) return false;
     return cells.every(([rr, cc]) => !occ.has(`${rr},${cc}`));
   }
 };

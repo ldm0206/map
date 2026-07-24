@@ -138,3 +138,22 @@ test('canPlaceEntity rejects overlapping placements', () => {
   // obstacle on bear cell → false
   assert.equal(Geometry.canPlaceEntity(state, [], 'obstacle', [1, 1]), false);
 });
+
+test('canPlaceEntity ignores moving entity own footprint when opts.ignoreSelf set', () => {
+  const state = {
+    bear: { row: 0, col: 0 },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
+    obstacles: []
+  };
+  // Bear currently at (0,0) 3x3. Moving to (0,1) overlaps old footprint (cols 1-2).
+  // Note: original spec used (1,0) but bear-at-(1,0) covers row 3 incl. banner cell (3,0),
+  // so this is a pure self-overlap case using (0,1) instead.
+  // Without ignoreSelf → false (self overlap). With ignoreSelf for bear → true.
+  assert.equal(Geometry.canPlaceEntity(state, [], 'bear', [0, 1]), false);
+  assert.equal(Geometry.canPlaceEntity(state, [], 'bear', [0, 1], { ignoreSelf: { kind: 'bear', cell: [0, 0] } }), true);
+  // Still rejects real overlap: bear at (0,0) moving to (2,0) would overlap banner at (3,0) cell (3,0) → false even with ignoreSelf
+  assert.equal(Geometry.canPlaceEntity(state, [], 'bear', [2, 0], { ignoreSelf: { kind: 'bear', cell: [0, 0] } }), false);
+
+  // Banner self: banner at (3,0). Moving to (4,0) — own cell (3,0) excluded → true (if (4,0) free).
+  assert.equal(Geometry.canPlaceEntity(state, [], 'banner', [4, 0], { ignoreSelf: { kind: 'banner', cell: [3, 0] } }), true);
+});

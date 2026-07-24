@@ -77,7 +77,14 @@ export const Exporter = {
     const { canvas, dpr } = this._makeCanvas(view, cellSize);
     Renderer.draw(canvas, store, { cellSize, view });
     const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
+    // NOTE: Renderer.draw already called ctx.scale(dpr, dpr) using window.devicePixelRatio,
+    // and reset canvas.width/height. Do NOT scale again here — a second ctx.scale(dpr, dpr)
+    // would double-scale all overlay coordinates and clobber the logical space Renderer set up.
+    // All toPx / strokeRect / arrow calls below operate in the same CSS-pixel logical space
+    // Renderer.draw uses: toPx(r,c) = [(c - view.minCol) * cellSize, (r - view.minRow) * cellSize]
+    // is the top-left of cell (r,c). The brief's toPx helper below adds +cellSize to return the
+    // CENTER of a 2x2 player block anchored at (r,c); strokeRect then subtracts cellSize to get
+    // back to top-left. This aligns overlays with the grid Renderer painted.
     const toPx = (r, c) => [(c - view.minCol) * cellSize + cellSize, (r - view.minRow) * cellSize + cellSize];
 
     const colorFor = (move) => move.from === null ? '#2563eb' : '#f97316'; // 新增蓝 / 移动橙

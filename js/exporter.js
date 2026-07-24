@@ -18,7 +18,7 @@ export const Exporter = {
     reader.onload = () => {
       try {
         const obj = JSON.parse(reader.result);
-        if (!obj.bear || !obj.banner) throw new Error('无效的项目文件');
+        if (!obj.bear || !Array.isArray(obj.banners)) throw new Error('无效的项目文件');
         store.push();
         const state = store.get();
         Object.assign(state, obj);

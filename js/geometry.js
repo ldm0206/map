@@ -103,5 +103,30 @@ export const Geometry = {
       if (inside(r, c) && inside(r, c+1) && inside(r+1, c) && inside(r+1, c+1)) return true;
     }
     return false;
+  },
+
+  occupiedCells(state, occupiedByFixed) {
+    const occ = new Set();
+    const add = (r, c) => occ.add(`${r},${c}`);
+    for (let r = state.bear.row; r < state.bear.row + 3; r++)
+      for (let c = state.bear.col; c < state.bear.col + 3; c++) add(r, c);
+    for (const bn of state.banners || []) add(bn.row, bn.col);
+    for (const o of state.obstacles || []) for (const [r, c] of o.cells) add(r, c);
+    for (const [fr, fc] of occupiedByFixed || []) {
+      add(fr, fc); add(fr, fc + 1); add(fr + 1, fc); add(fr + 1, fc + 1);
+    }
+    return occ;
+  },
+
+  canPlaceEntity(state, occupiedByFixed, kind, cell, opts) {
+    const [r, c] = cell;
+    const occ = this.occupiedCells(state, occupiedByFixed);
+    const cells = [];
+    if (kind === 'banner' || kind === 'obstacle') cells.push([r, c]);
+    else if (kind === 'player') cells.push([r,c],[r,c+1],[r+1,c],[r+1,c+1]);
+    else if (kind === 'bear') {
+      for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push([r+dr, c+dc]);
+    } else return false;
+    return cells.every(([rr, cc]) => !occ.has(`${rr},${cc}`));
   }
 };

@@ -106,3 +106,35 @@ test('inCoverage true if covered by any banner', () => {
   // cell [5,5] inside neither
   assert.equal(Geometry.inCoverage([5, 5], banners), false);
 });
+
+test('occupiedCells unions bear, banners, obstacles, fixed players', () => {
+  const state = {
+    bear: { row: 0, col: 0 },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
+    obstacles: [{ id: 'o1', type: 'mine', cells: [[5,5]] }]
+  };
+  const occ = Geometry.occupiedCells(state, [[4,4]]);
+  assert.equal(occ.has('0,0'), true);   // bear
+  assert.equal(occ.has('3,0'), true);   // banner
+  assert.equal(occ.has('5,5'), true);   // obstacle
+  assert.equal(occ.has('4,4'), true);   // fixed player
+  assert.equal(occ.has('4,6'), false);  // free
+});
+
+test('canPlaceEntity rejects overlapping placements', () => {
+  const state = {
+    bear: { row: 0, col: 0 },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
+    obstacles: []
+  };
+  // banner on bear cell (0,0) → false
+  assert.equal(Geometry.canPlaceEntity(state, [], 'banner', [0, 0]), false);
+  // banner on free cell (3,3) → true
+  assert.equal(Geometry.canPlaceEntity(state, [], 'banner', [3, 3]), true);
+  // bear overlapping existing banner (bear 3x3 at (2,0) covers (3,0)=banner) → false
+  assert.equal(Geometry.canPlaceEntity(state, [], 'bear', [2, 0]), false);
+  // bear on free area (10,10) → true
+  assert.equal(Geometry.canPlaceEntity(state, [], 'bear', [10, 10]), true);
+  // obstacle on bear cell → false
+  assert.equal(Geometry.canPlaceEntity(state, [], 'obstacle', [1, 1]), false);
+});

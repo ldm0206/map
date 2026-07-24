@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MinimalSolver } from '../js/minimalSolver.js';
 
-const state = { bear: { row: 0, col: 0 }, banner: { row: 3, col: 0, fixed: true }, obstacles: [] };
+const state = { bear: { row: 0, col: 0 }, banners: [{ id: 'b1', row: 3, col: 0, fixed: true }], obstacles: [] };
 
 test('minimal keeps existing players in place when possible', () => {
   const players = [

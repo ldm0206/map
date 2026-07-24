@@ -57,7 +57,7 @@ export const MinimalSolver = {
     }
     const movable = players.filter(p => !(p.fixed && p.fixedCell));
     const cands = Geometry.candidateCells(state, occupiedByFixed)
-      .filter(cell => Geometry.inCoverage(cell, state.banner));
+      .filter(cell => Geometry.inCoverage(cell, state.banners));
     if (movable.length === 0) return { placement, unplaced: [], moves: [] };
     if (cands.length < movable.length) {
       return { placement, unplaced: movable.map(p => p.id), moves: [], error: '容量不足' };

@@ -4,7 +4,7 @@ import { StrictSolver } from '../js/strictSolver.js';
 
 const state = {
   bear: { row: 0, col: 0 },
-  banner: { row: 3, col: 0, fixed: true },
+  banners: [{ id: 'b1', row: 3, col: 0, fixed: true }],
   obstacles: []
 };
 

@@ -11,7 +11,7 @@ export const StrictSolver = {
       }
     }
     const allCands = Geometry.candidateCells(state, occupiedByFixed)
-      .filter(cell => Geometry.inCoverage(cell, state.banner));
+      .filter(cell => Geometry.inCoverage(cell, state.banners));
     const taken = new Set(); // occupied 2x2 corner keys
     const overlapsTaken = (cell) => {
       const [r, c] = cell;

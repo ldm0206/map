@@ -14,8 +14,8 @@ export const Geometry = {
     // bear 3x3
     for (let r = state.bear.row; r < state.bear.row + 3; r++)
       for (let c = state.bear.col; c < state.bear.col + 3; c++) add(r, c);
-    // banner
-    add(state.banner.row, state.banner.col);
+    // banners
+    for (const bn of state.banners || []) add(bn.row, bn.col);
     // obstacles
     for (const o of state.obstacles || [])
       for (const [r, c] of o.cells) add(r, c);
@@ -25,10 +25,10 @@ export const Geometry = {
     }
     // buildable = map cells minus blocked. Map size computed by caller via computeView;
     // here we return blocked set inverted over a bounding region derived from state.
-    // Determine bounding region: union of bear, banner, obstacles, fixed, expanded by 8.
+    // Determine bounding region: union of bear, banners, obstacles, fixed, expanded by 8.
     const rows = [], cols = [];
     for (let r = state.bear.row; r < state.bear.row + 3; r++) { rows.push(r); cols.push(state.bear.col); cols.push(state.bear.col+2); }
-    rows.push(state.banner.row); cols.push(state.banner.col);
+    for (const bn of state.banners || []) { rows.push(bn.row); cols.push(bn.col); }
     for (const o of state.obstacles || []) for (const [r,c] of o.cells) { rows.push(r); cols.push(c); }
     for (const [fr, fc] of occupiedByFixed || []) { rows.push(fr); rows.push(fr+1); cols.push(fc); cols.push(fc+1); }
     const minR = Math.min(...rows) - 8, maxR = Math.max(...rows) + 8;
@@ -72,9 +72,11 @@ export const Geometry = {
   computeView(state, placedPlayers, minView) {
     const rows = [], cols = [];
     for (let r = state.bear.row; r < state.bear.row + 3; r++) { rows.push(r); cols.push(state.bear.col); cols.push(state.bear.col+2); }
-    rows.push(state.banner.row); cols.push(state.banner.col);
-    const cov = this.bannerCoverage(state.banner);
-    rows.push(cov.minRow, cov.maxRow); cols.push(cov.minCol, cov.maxCol);
+    for (const bn of state.banners || []) {
+      rows.push(bn.row); cols.push(bn.col);
+      const cov = this.bannerCoverage(bn);
+      rows.push(cov.minRow, cov.maxRow); cols.push(cov.minCol, cov.maxCol);
+    }
     for (const o of state.obstacles || []) for (const [r, c] of o.cells) { rows.push(r); cols.push(c); }
     for (const [r, c] of placedPlayers || []) { rows.push(r, r + 1); cols.push(c, c + 1); }
     let minR = Math.min(...rows) - 1, maxR = Math.max(...rows) + 1;
@@ -93,10 +95,13 @@ export const Geometry = {
     return b.has(`${r},${c}`) && b.has(`${r},${c+1}`) && b.has(`${r+1},${c}`) && b.has(`${r+1},${c+1}`);
   },
 
-  inCoverage(cell, banner) {
+  inCoverage(cell, banners) {
     const [r, c] = cell;
-    const cov = this.bannerCoverage(banner);
-    const inside = (rr, cc) => rr >= cov.minRow && rr <= cov.maxRow && cc >= cov.minCol && cc <= cov.maxCol;
-    return inside(r, c) && inside(r, c+1) && inside(r+1, c) && inside(r+1, c+1);
+    for (const bn of banners || []) {
+      const cov = this.bannerCoverage(bn);
+      const inside = (rr, cc) => rr >= cov.minRow && rr <= cov.maxRow && cc >= cov.minCol && cc <= cov.maxCol;
+      if (inside(r, c) && inside(r, c+1) && inside(r+1, c) && inside(r+1, c+1)) return true;
+    }
+    return false;
   }
 };

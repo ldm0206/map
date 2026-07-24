@@ -12,7 +12,7 @@ test('distance from player at bear center is small', () => {
 test('buildableCells excludes bear, banner, obstacles', () => {
   const state = {
     bear: { row: 0, col: 0 },
-    banner: { row: 3, col: 0, fixed: false },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
     obstacles: [{ id: 'o1', type: 'mine', cells: [[5, 5]] }]
   };
   const cells = Geometry.buildableCells(state, []);
@@ -30,7 +30,7 @@ test('buildableCells excludes bear, banner, obstacles', () => {
 test('buildableCells excludes fixed player 2x2', () => {
   const state = {
     bear: { row: 0, col: 0 },
-    banner: { row: 3, col: 0, fixed: false },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
     obstacles: []
   };
   const cells = Geometry.buildableCells(state, [[4, 4]]);
@@ -43,7 +43,7 @@ test('buildableCells excludes fixed player 2x2', () => {
 test('candidateCells returns sorted 2x2 left corners', () => {
   const state = {
     bear: { row: 0, col: 0 },
-    banner: { row: 3, col: 0, fixed: false },
+    banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
     obstacles: []
   };
   const cands = Geometry.candidateCells(state, []);
@@ -66,7 +66,7 @@ test('bannerCoverage is 7x7 centered on banner', () => {
 });
 
 test('computeView expands and respects minView', () => {
-  const state = { bear: { row: 0, col: 0 }, banner: { row: 3, col: 0 }, obstacles: [] };
+  const state = { bear: { row: 0, col: 0 }, banners: [{ id: 'b1', row: 3, col: 0 }], obstacles: [] };
   const v = Geometry.computeView(state, [[6, 6]], null);
   // bear rows0-2, banner row3, player row6-7 → maxRow 7, +1 = 8; min 0-1=-1
   assert.equal(v.maxRow, 8);
@@ -82,7 +82,7 @@ test('overlapsRect detects overlap', () => {
 });
 
 test('canPlace true for free cell, false for bear/banner', () => {
-  const state = { bear: { row: 0, col: 0 }, banner: { row: 3, col: 0 }, obstacles: [] };
+  const state = { bear: { row: 0, col: 0 }, banners: [{ id: 'b1', row: 3, col: 0 }], obstacles: [] };
   assert.equal(Geometry.canPlace(state, [], [0, 3]), true);
   assert.equal(Geometry.canPlace(state, [], [0, 0]), false);
   assert.equal(Geometry.canPlace(state, [], [3, 0]), false);
@@ -90,6 +90,19 @@ test('canPlace true for free cell, false for bear/banner', () => {
 
 test('inCoverage checks all 4 cells inside 7x7', () => {
   const banner = { row: 3, col: 0 };
-  assert.equal(Geometry.inCoverage([0, 0], banner), true);
-  assert.equal(Geometry.inCoverage([5, 3], banner), false);
+  assert.equal(Geometry.inCoverage([0, 0], [banner]), true);
+  assert.equal(Geometry.inCoverage([5, 3], [banner]), false);
+});
+
+test('inCoverage true if covered by any banner', () => {
+  const banners = [
+    { id: 'b1', row: 3, col: 0, fixed: false },
+    { id: 'b2', row: 10, col: 10, fixed: false }
+  ];
+  // banner2 coverage rows7..13 cols7..13; cell [8,8] 2x2 inside b2 only
+  assert.equal(Geometry.inCoverage([8, 8], banners), true);
+  // cell [0,0] inside b1 only
+  assert.equal(Geometry.inCoverage([0, 0], banners), true);
+  // cell [5,5] inside neither
+  assert.equal(Geometry.inCoverage([5, 5], banners), false);
 });

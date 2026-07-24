@@ -128,5 +128,17 @@ $('btn-clear').addEventListener('click', () => {
 });
 $('btn-final').addEventListener('click', () => Exporter.exportFinalImage(store));
 $('btn-changes').addEventListener('click', () => Exporter.exportChangesImage(store, lastOldPlacement));
+$('btn-reset') && $('btn-reset').addEventListener('click', () => {
+  if (!confirm('重置将清空所有旗帜/障碍/玩家/排位，熊坑归位。确认？')) return;
+  store.push();
+  const state = store.get();
+  state.bear = { row: 0, col: 0 };
+  state.banners = [{ id: 'b1', row: 3, col: 0, fixed: false }];
+  state.obstacles = [];
+  state.players = [];
+  state.placement = {};
+  lastOldPlacement = {};
+  render();
+});
 
 render();

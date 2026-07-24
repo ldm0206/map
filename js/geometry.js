@@ -38,5 +38,52 @@ export const Geometry = {
       for (let c = minC; c <= maxC; c++)
         if (!blocked.has(`${r},${c}`)) result.add(`${r},${c}`);
     return result;
+  },
+
+  candidateCells(state, occupiedByFixed) {
+    const buildable = this.buildableCells(state, occupiedByFixed);
+    // bounding region from buildable set
+    let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+    for (const k of buildable) {
+      const [r, c] = k.split(',').map(Number);
+      if (r < minR) minR = r; if (r > maxR) maxR = r;
+      if (c < minC) minC = c; if (c > maxC) maxC = c;
+    }
+    const result = [];
+    for (let r = minR; r <= maxR - 1; r++)
+      for (let c = minC; c <= maxC - 1; c++) {
+        if (buildable.has(`${r},${c}`) && buildable.has(`${r},${c+1}`)
+            && buildable.has(`${r+1},${c}`) && buildable.has(`${r+1},${c+1}`)) {
+          result.push([r, c]);
+        }
+      }
+    result.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    return result;
+  },
+
+  bannerCoverage(banner) {
+    return { minRow: banner.row - 3, minCol: banner.col - 3, maxRow: banner.row + 3, maxCol: banner.col + 3 };
+  },
+
+  overlapsRect(a, b) {
+    return !(a.maxRow < b.minRow || b.maxRow < a.minRow || a.maxCol < b.minCol || b.maxCol < a.minCol);
+  },
+
+  computeView(state, placedPlayers, minView) {
+    const rows = [], cols = [];
+    for (let r = state.bear.row; r < state.bear.row + 3; r++) { rows.push(r); cols.push(state.bear.col); cols.push(state.bear.col+2); }
+    rows.push(state.banner.row); cols.push(state.banner.col);
+    const cov = this.bannerCoverage(state.banner);
+    rows.push(cov.minRow, cov.maxRow); cols.push(cov.minCol, cov.maxCol);
+    for (const o of state.obstacles || []) for (const [r, c] of o.cells) { rows.push(r); cols.push(c); }
+    for (const [r, c] of placedPlayers || []) { rows.push(r, r + 1); cols.push(c, c + 1); }
+    let minR = Math.min(...rows) - 1, maxR = Math.max(...rows) + 1;
+    let minC = Math.min(...cols) - 1, maxC = Math.max(...cols) + 1;
+    if (minView) {
+      const curW = maxC - minC + 1, curH = maxR - minR + 1;
+      if (curW < minView.w) { const extra = minView.w - curW; minC -= Math.floor(extra / 2); maxC += Math.ceil(extra / 2); }
+      if (curH < minView.h) { const extra = minView.h - curH; minR -= Math.floor(extra / 2); maxR += Math.ceil(extra / 2); }
+    }
+    return { minRow: minR, minCol: minC, maxRow: maxR, maxCol: maxC };
   }
 };

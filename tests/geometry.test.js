@@ -39,3 +39,44 @@ test('buildableCells excludes fixed player 2x2', () => {
   assert.equal(cells.has('5,5'), false);
   assert.equal(cells.has('4,6'), true);
 });
+
+test('candidateCells returns sorted 2x2 left corners', () => {
+  const state = {
+    bear: { row: 0, col: 0 },
+    banner: { row: 3, col: 0, fixed: false },
+    obstacles: []
+  };
+  const cands = Geometry.candidateCells(state, []);
+  // (0,3): cells (0,3)(0,4)(1,3)(1,4) — none in bear, none banner → valid
+  assert.ok(cands.some(([r, c]) => r === 0 && c === 3));
+  // (0,0) invalid (bear)
+  assert.ok(!cands.some(([r, c]) => r === 0 && c === 0));
+  // sorted
+  for (let i = 1; i < cands.length; i++) {
+    const [pr, pc] = cands[i - 1], [cr, cc] = cands[i];
+    assert.ok(pr < cr || (pr === cr && pc <= cc));
+  }
+});
+
+test('bannerCoverage is 7x7 centered on banner', () => {
+  const cov = Geometry.bannerCoverage({ row: 5, col: 5 });
+  // 7x7 centered: rows 5-3=2..5+3=8
+  assert.equal(cov.minRow, 2); assert.equal(cov.maxRow, 8);
+  assert.equal(cov.minCol, 2); assert.equal(cov.maxCol, 8);
+});
+
+test('computeView expands and respects minView', () => {
+  const state = { bear: { row: 0, col: 0 }, banner: { row: 3, col: 0 }, obstacles: [] };
+  const v = Geometry.computeView(state, [[6, 6]], null);
+  // bear rows0-2, banner row3, player row6-7 → maxRow 7, +1 = 8; min 0-1=-1
+  assert.equal(v.maxRow, 8);
+  assert.equal(v.minRow, -1);
+  const v2 = Geometry.computeView(state, [], { w: 20, h: 20 });
+  // minView 20x20 centered around content → at least 20 wide
+  assert.ok(v2.maxRow - v2.minRow + 1 >= 20);
+});
+
+test('overlapsRect detects overlap', () => {
+  assert.equal(Geometry.overlapsRect({minRow:0,minCol:0,maxRow:2,maxCol:2}, {minRow:2,minCol:2,maxRow:4,maxCol:4}), true);
+  assert.equal(Geometry.overlapsRect({minRow:0,minCol:0,maxRow:1,maxCol:1}, {minRow:3,minCol:3,maxRow:4,maxCol:4}), false);
+});

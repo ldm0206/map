@@ -85,5 +85,18 @@ export const Geometry = {
       if (curH < minView.h) { const extra = minView.h - curH; minR -= Math.floor(extra / 2); maxR += Math.ceil(extra / 2); }
     }
     return { minRow: minR, minCol: minC, maxRow: maxR, maxCol: maxC };
+  },
+
+  canPlace(state, occupiedByFixed, cell) {
+    const [r, c] = cell;
+    const b = this.buildableCells(state, occupiedByFixed);
+    return b.has(`${r},${c}`) && b.has(`${r},${c+1}`) && b.has(`${r+1},${c}`) && b.has(`${r+1},${c+1}`);
+  },
+
+  inCoverage(cell, banner) {
+    const [r, c] = cell;
+    const cov = this.bannerCoverage(banner);
+    const inside = (rr, cc) => rr >= cov.minRow && rr <= cov.maxRow && cc >= cov.minCol && cc <= cov.maxCol;
+    return inside(r, c) && inside(r, c+1) && inside(r+1, c) && inside(r+1, c+1);
   }
 };

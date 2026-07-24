@@ -80,3 +80,16 @@ test('overlapsRect detects overlap', () => {
   assert.equal(Geometry.overlapsRect({minRow:0,minCol:0,maxRow:2,maxCol:2}, {minRow:2,minCol:2,maxRow:4,maxCol:4}), true);
   assert.equal(Geometry.overlapsRect({minRow:0,minCol:0,maxRow:1,maxCol:1}, {minRow:3,minCol:3,maxRow:4,maxCol:4}), false);
 });
+
+test('canPlace true for free cell, false for bear/banner', () => {
+  const state = { bear: { row: 0, col: 0 }, banner: { row: 3, col: 0 }, obstacles: [] };
+  assert.equal(Geometry.canPlace(state, [], [0, 3]), true);
+  assert.equal(Geometry.canPlace(state, [], [0, 0]), false);
+  assert.equal(Geometry.canPlace(state, [], [3, 0]), false);
+});
+
+test('inCoverage checks all 4 cells inside 7x7', () => {
+  const banner = { row: 3, col: 0 };
+  assert.equal(Geometry.inCoverage([0, 0], banner), true);
+  assert.equal(Geometry.inCoverage([5, 3], banner), false);
+});

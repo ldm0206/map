@@ -2,15 +2,15 @@ import { Geometry } from './geometry.js';
 
 const COLORS = {
   grid: '#D6CDBB',
-  bear: '#7B2D26',
-  banner: '#E8B84B',
-  coverage: 'rgba(232, 184, 75, 0.10)',
-  coverageBorder: '#C08A35',
-  mountain: '#6B7280',
-  lake: '#4A90D9',
-  mine: '#8B5CF6',
-  playerRings: ['#3D9970', '#2E86C1', '#9B59B6', '#E67E22', '#16A085'],
-  playerRingBorders: ['#1F5C40', '#1B4F72', '#5B2C6F', '#9C4A0F', '#0B5345'],
+  bear: '#8B4A42',
+  banner: '#D9B974',
+  coverage: 'rgba(217, 185, 116, 0.10)',
+  coverageBorder: '#B08F4F',
+  mountain: '#8B8C89',
+  lake: '#7FA8C9',
+  mine: '#9B86BD',
+  playerRings: ['#B08968', '#7E8C7A', '#A47786', '#6F7D9C', '#8E8272', '#748A8C'],
+  playerRingBorders: ['#7F5A3C', '#55604F', '#6F4A5A', '#48536B', '#5E554A', '#4C5C5E'],
   playerIdText: 'rgba(31, 26, 20, 0.55)',
   fixed: '#F59E0B',
   text: '#1F1A14'
@@ -117,7 +117,7 @@ export const Renderer = {
       if (!cell0) continue;
       let [x, y] = toPx(cell0[0], cell0[1]);
       const dist = Geometry.distance(cell0, state.bear);
-      const ring = Math.max(0, Math.floor(dist / 2)) % COLORS.playerRings.length;
+      const ring = Math.max(0, Math.floor(dist)) % COLORS.playerRings.length;
       const bodyColor = p.fixed ? COLORS.fixed : COLORS.playerRings[ring];
       const borderColor = p.fixed ? COLORS.fixed : COLORS.playerRingBorders[ring];
       ctx.fillStyle = bodyColor;

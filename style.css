@@ -635,17 +635,22 @@ hr {
     height: auto;
     min-height: 48px;
     padding: 6px 10px;
-    gap: 6px;
+    gap: 4px;
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
   }
-  .topbar-brand { font-size: 16px; }
+  .topbar-brand { font-size: 15px; flex-shrink: 0; }
   .topbar-brand::before { width: 3px; height: 18px; }
-  .topbar-divider { height: 18px; margin: 0 4px; }
-  #topbar .btn { height: 36px; padding: 0 10px; font-size: 13px; }
-  .zoom-wrap { gap: 6px; }
-  #zoom { width: 90px; }
+  .topbar-divider { height: 18px; margin: 0 2px; flex-shrink: 0; }
+  .topbar-group { flex-shrink: 0; gap: 2px; }
+  #topbar .btn { height: 36px; padding: 0 8px; font-size: 12px; flex-shrink: 0; }
+  .zoom-wrap { gap: 4px; flex-shrink: 0; font-size: 11px; }
+  .zoom-wrap > span:first-child { display: none; }
+  #zoom { width: 70px; }
+  .zoom-value { min-width: 32px; font-size: 11px; }
+  .topbar-spacer { display: none; }
 
   /* 主区改为纵向堆叠 */
   #main {
@@ -659,27 +664,30 @@ hr {
     flex-direction: row;
     align-items: center;
     padding: 8px 10px;
-    gap: 8px;
+    gap: 6px;
     border-right: none;
     border-bottom: 1px solid var(--border-soft);
     overflow-x: auto;
     overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   #leftbar .panel-section {
     flex-direction: row;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
+    flex-shrink: 0;
   }
   #leftbar .panel-title { display: none; }
   #leftbar .tool {
     width: auto;
-    height: 44px;
-    padding: 0 12px;
+    height: 40px;
+    padding: 0 10px;
     margin-bottom: 0;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 13px;
+    gap: 6px;
   }
-  #leftbar .tool-name { display: inline; }
+  #leftbar .tool-icon { width: 14px; height: 14px; }
   #leftbar .tool-tag { display: none; }
   .leftbar-actions {
     margin-top: 0;
@@ -687,8 +695,9 @@ hr {
     border-top: none;
     margin-left: auto;
     flex-shrink: 0;
+    gap: 2px;
   }
-  .leftbar-actions .icon-btn { width: 44px; height: 44px; }
+  .leftbar-actions .icon-btn { width: 40px; height: 40px; }
 
   /* 地图区自适应剩余空间 */
   #canvas-wrap {

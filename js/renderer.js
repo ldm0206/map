@@ -10,7 +10,6 @@ const COLORS = {
   lake: '#7FA8C9',
   mine: '#9B86BD',
   playerRings: ['#C89A6F', '#94AC8B', '#C08A9B', '#8295BC', '#A89B88', '#89A6A9'],
-  playerRingBorders: ['#8F6540', '#5F7258', '#7E5468', '#54658C', '#6E6355', '#586F71'],
   playerIdText: 'rgba(31, 26, 20, 0.55)',
   fixed: '#C9A961',
   text: '#1F1A14'
@@ -137,7 +136,6 @@ export const Renderer = {
       const dist = Geometry.distance(cell0, state.bear);
       const ring = ringIndexFor(dist);
       const bodyColor = COLORS.playerRings[ring];
-      const borderColor = p.fixed ? COLORS.fixed : COLORS.playerRingBorders[ring];
       ctx.fillStyle = bodyColor;
       ctx.globalAlpha = 0.85;
       ctx.fillRect(x, y, 2 * cell, 2 * cell);
@@ -146,10 +144,12 @@ export const Renderer = {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.lineWidth = 3;
       ctx.strokeRect(x + 1.5, y + 1.5, 2 * cell - 3, 2 * cell - 3);
-      // main border: gold for fixed, ring color otherwise
-      ctx.strokeStyle = borderColor;
-      ctx.lineWidth = p.fixed ? 2 : 1;
-      ctx.strokeRect(x + 0.5, y + 0.5, 2 * cell - 1, 2 * cell - 1);
+      // fixed players get a soft gold frame
+      if (p.fixed) {
+        ctx.strokeStyle = COLORS.fixed;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + 0.5, y + 0.5, 2 * cell - 1, 2 * cell - 1);
+      }
       ctx.fillStyle = COLORS.text;
       ctx.font = `600 ${cell * 0.4}px sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';

@@ -151,9 +151,29 @@ export const Renderer = {
         ctx.strokeRect(x + 0.5, y + 0.5, 2 * cell - 1, 2 * cell - 1);
       }
       ctx.fillStyle = COLORS.text;
-      ctx.font = `600 ${cell * 0.4}px sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(p.name, x + cell, y + cell * 0.85);
+      const name = String(p.name);
+      const maxWidth = 2 * cell - 6;
+      ctx.font = `600 ${cell * 0.4}px sans-serif`;
+      if (ctx.measureText(name).width <= maxWidth) {
+        ctx.fillText(name, x + cell, y + cell * 0.85);
+      } else {
+        // split into two lines, prefer break near middle at ASCII space/hyphen
+        const mid = Math.floor(name.length / 2);
+        let split = -1;
+        for (let i = 0; i < name.length - 1; i++) {
+          const ch = name[i];
+          if (ch === ' ' || ch === '-' || ch === '·' || ch === '_' || ch === '/') {
+            if (split < 0 || Math.abs(i + 1 - mid) < Math.abs(split - mid)) split = i + 1;
+          }
+        }
+        if (split <= 0 || split >= name.length) split = mid;
+        const line1 = name.slice(0, split).trim();
+        const line2 = name.slice(split).trim();
+        ctx.font = `600 ${cell * 0.32}px sans-serif`;
+        ctx.fillText(line1, x + cell, y + cell * 0.55);
+        ctx.fillText(line2, x + cell, y + cell * 1.15);
+      }
       ctx.fillStyle = COLORS.playerIdText;
       ctx.font = `${cell * 0.18}px sans-serif`;
       ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';

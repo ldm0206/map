@@ -96,7 +96,14 @@ function renderPlayerList() {
 Editor.init(canvas, store, () => tool, render, () => cellSize, getView, () => {
   const p = store.get().players.find(p => p.id === selectedPlayerId);
   return p || null;
-}, () => { selectedPlayerId = null; }); // onPlayerPlaced: clear selection after a manual place
+}, () => { selectedPlayerId = null; }, (nextCellSize) => {
+  cellSize = Math.max(20, Math.min(80, nextCellSize));
+  const zoomInput = $('zoom');
+  if (zoomInput) zoomInput.value = cellSize;
+  const zv = $('zoom-value');
+  if (zv) zv.textContent = cellSize + 'px';
+  render();
+});
 
 document.querySelectorAll('.tool').forEach(b => b.addEventListener('click', () => {
   tool = b.dataset.tool;

@@ -9,10 +9,15 @@ function cellFromEvent(e, canvas, view, cellSize) {
 }
 
 export const Editor = {
-  init(canvas, store, getTool, requestRender, getCellSize, getView, getSelectedPlayer, onPlayerPlaced) {
+  init(canvas, store, getTool, requestRender, getCellSize, getView, getSelectedPlayer, onPlayerPlaced, onPinchZoom) {
     let dragging = null;
+    const activePointers = new Map(); // pointerId -> {x, y}
+    let pinchStartDist = 0;
+    let pinchStartCellSize = 0;
 
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.style.touchAction = 'none'; // take over touch gestures
+
+    const handlePress = (e) => {
       const tool = getTool();
       const cellSize = getCellSize();
       const view = getView();
@@ -68,7 +73,6 @@ export const Editor = {
           }
         }
       } else if (tool === 'player') {
-        // hit-test placed player (2x2)
         const hitPlayer = state.players.find(p => {
           const pc = state.placement[p.id];
           return pc && r >= pc[0] && r <= pc[0]+1 && c >= pc[1] && c <= pc[1]+1;
@@ -93,9 +97,9 @@ export const Editor = {
         }
       }
       requestRender();
-    });
+    };
 
-    canvas.addEventListener('mousemove', (e) => {
+    const handleMove = (e) => {
       if (!dragging) return;
       const cellSize = getCellSize();
       const view = getView();
@@ -108,8 +112,50 @@ export const Editor = {
         }
       }
       requestRender();
+    };
+
+    canvas.addEventListener('pointerdown', (e) => {
+      canvas.setPointerCapture(e.pointerId);
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (activePointers.size === 2) {
+        // start pinch
+        const [p1, p2] = [...activePointers.values()];
+        pinchStartDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        pinchStartCellSize = getCellSize();
+        dragging = null; // cancel any drag
+        return;
+      }
+      if (activePointers.size === 1 && e.button === 0) {
+        handlePress(e);
+      }
     });
-    canvas.addEventListener('mouseup', () => { dragging = null; });
-    canvas.addEventListener('mouseleave', () => { dragging = null; });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!activePointers.has(e.pointerId)) return;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (activePointers.size === 2 && onPinchZoom) {
+        const [p1, p2] = [...activePointers.values()];
+        const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        if (pinchStartDist > 0 && dist > 0) {
+          const next = Math.round(pinchStartCellSize * (dist / pinchStartDist));
+          onPinchZoom(next);
+        }
+        return;
+      }
+      if (activePointers.size === 1) handleMove(e);
+    });
+
+    const endPointer = (e) => {
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) {
+        pinchStartDist = 0;
+      }
+      if (activePointers.size === 0) {
+        dragging = null;
+      }
+    };
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+    canvas.addEventListener('pointerleave', endPointer);
   }
 };

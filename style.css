@@ -620,3 +620,110 @@ hr {
   border: 2px solid var(--bg-panel);
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* ============ 触摸设备:禁用 hover tooltip ============ */
+@media (hover: none) {
+  [data-tip]::after { display: none; }
+}
+
+/* ============ 移动端 (≤ 768px) ============ */
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+
+  /* 顶栏:压缩,允许横向滚动 */
+  #topbar {
+    height: auto;
+    min-height: 48px;
+    padding: 6px 10px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .topbar-brand { font-size: 16px; }
+  .topbar-brand::before { width: 3px; height: 18px; }
+  .topbar-divider { height: 18px; margin: 0 4px; }
+  #topbar .btn { height: 36px; padding: 0 10px; font-size: 13px; }
+  .zoom-wrap { gap: 6px; }
+  #zoom { width: 90px; }
+
+  /* 主区改为纵向堆叠 */
+  #main {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 左栏 → 顶部横排工具条 */
+  #leftbar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+    gap: 8px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-soft);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  #leftbar .panel-section {
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+  }
+  #leftbar .panel-title { display: none; }
+  #leftbar .tool {
+    width: auto;
+    height: 44px;
+    padding: 0 12px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  #leftbar .tool-name { display: inline; }
+  #leftbar .tool-tag { display: none; }
+  .leftbar-actions {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .leftbar-actions .icon-btn { width: 44px; height: 44px; }
+
+  /* 地图区自适应剩余空间 */
+  #canvas-wrap {
+    flex: 1;
+    padding: 8px;
+    min-height: 0;
+  }
+  #canvas-card { padding: 8px; }
+
+  /* 右栏 → 底部抽屉,默认折叠,点击标题展开 */
+  #rightbar {
+    width: 100%;
+    max-height: 45vh;
+    padding: 10px 12px;
+    border-left: none;
+    border-top: 1px solid var(--border-soft);
+    overflow-y: auto;
+    gap: 10px;
+  }
+  #rightbar .panel-title { font-size: 15px; }
+  #player-list li { padding: 10px 12px; gap: 10px; min-height: 48px; }
+  .pname { font-size: 14px; }
+  .pfix { width: 18px; height: 18px; }
+  .pdel { width: 32px; height: 32px; font-size: 20px; }
+  .badge { font-size: 11px; padding: 3px 7px; }
+
+  #rightbar .btn { height: 44px; font-size: 14px; }
+  .mode-card { padding: 10px 12px; }
+  .mode-card .mode-name { font-size: 14px; }
+  .mode-card .mode-desc { font-size: 12px; }
+}
+
+/* 超小屏 (≤ 480px):进一步压缩 */
+@media (max-width: 480px) {
+  .topbar-brand { display: none; }
+  #topbar .btn { padding: 0 8px; font-size: 12px; }
+  #leftbar .tool { height: 40px; padding: 0 10px; font-size: 13px; }
+}

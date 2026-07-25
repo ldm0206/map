@@ -241,6 +241,10 @@ hr {
   outline: none;
   cursor: pointer;
 }
+#zoom:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 #zoom::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;

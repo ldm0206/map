@@ -9,10 +9,10 @@ const COLORS = {
   mountain: '#8B8C89',
   lake: '#7FA8C9',
   mine: '#9B86BD',
-  playerRings: ['#B08968', '#7E8C7A', '#A47786', '#6F7D9C', '#8E8272', '#748A8C'],
-  playerRingBorders: ['#7F5A3C', '#55604F', '#6F4A5A', '#48536B', '#5E554A', '#4C5C5E'],
+  playerRings: ['#C89A6F', '#94AC8B', '#C08A9B', '#8295BC', '#A89B88', '#89A6A9'],
+  playerRingBorders: ['#8F6540', '#5F7258', '#7E5468', '#54658C', '#6E6355', '#586F71'],
   playerIdText: 'rgba(31, 26, 20, 0.55)',
-  fixed: '#F59E0B',
+  fixed: '#C9A961',
   text: '#1F1A14'
 };
 
@@ -111,21 +111,45 @@ export const Renderer = {
       }
     }
 
-    // players
+    // players — dynamic equal-width bucketing over actual distance range
+    const seatedDists = [];
+    for (const p of state.players) {
+      const cell0 = state.placement[p.id];
+      if (cell0) seatedDists.push(Geometry.distance(cell0, state.bear));
+    }
+    const bucketCount = COLORS.playerRings.length;
+    let minD = 0, maxD = 1;
+    if (seatedDists.length) {
+      minD = Math.min(...seatedDists);
+      maxD = Math.max(...seatedDists);
+      if (maxD - minD < 1e-6) maxD = minD + 1; // avoid zero-width range
+    }
+    const bucketWidth = (maxD - minD) / bucketCount;
+    const ringIndexFor = (dist) => {
+      const idx = Math.floor((dist - minD) / bucketWidth);
+      return Math.min(bucketCount - 1, Math.max(0, idx));
+    };
+
     for (const p of state.players) {
       const cell0 = state.placement[p.id];
       if (!cell0) continue;
       let [x, y] = toPx(cell0[0], cell0[1]);
       const dist = Geometry.distance(cell0, state.bear);
-      const ring = Math.max(0, Math.floor(dist)) % COLORS.playerRings.length;
-      const bodyColor = p.fixed ? COLORS.fixed : COLORS.playerRings[ring];
+      const ring = ringIndexFor(dist);
+      const bodyColor = COLORS.playerRings[ring];
       const borderColor = p.fixed ? COLORS.fixed : COLORS.playerRingBorders[ring];
       ctx.fillStyle = bodyColor;
-      ctx.globalAlpha = 0.7;
+      ctx.globalAlpha = 0.85;
       ctx.fillRect(x, y, 2 * cell, 2 * cell);
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = borderColor; ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, 2 * cell, 2 * cell);
+      // white separator between adjacent player blocks
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x + 1.5, y + 1.5, 2 * cell - 3, 2 * cell - 3);
+      // main border: gold for fixed, ring color otherwise
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = p.fixed ? 2 : 1;
+      ctx.strokeRect(x + 0.5, y + 0.5, 2 * cell - 1, 2 * cell - 1);
       ctx.fillStyle = COLORS.text;
       ctx.font = `600 ${cell * 0.4}px sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';

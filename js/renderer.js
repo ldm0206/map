@@ -9,8 +9,8 @@ const COLORS = {
   mountain: '#6B7280',
   lake: '#4A90D9',
   mine: '#8B5CF6',
-  player: '#3D9970',
-  playerBorder: '#1F5C40',
+  playerRings: ['#3D9970', '#2E86C1', '#9B59B6', '#E67E22', '#16A085'],
+  playerRingBorders: ['#1F5C40', '#1B4F72', '#5B2C6F', '#9C4A0F', '#0B5345'],
   playerIdText: 'rgba(31, 26, 20, 0.55)',
   fixed: '#F59E0B',
   text: '#1F1A14'
@@ -52,13 +52,41 @@ export const Renderer = {
       let [x1, y1] = toPx(view.minRow, c); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1, y1 + h); ctx.stroke();
     }
 
-    // obstacles
+    // obstacles (mountain / lake) with per-component labels
     for (const o of state.obstacles) {
       ctx.fillStyle = COLORS[o.type] || '#888';
       for (const [r, c] of o.cells) {
         let [x, y] = toPx(r, c);
         ctx.fillRect(x, y, cell, cell);
       }
+      const label = o.type === 'mountain' ? '山' : (o.type === 'lake' ? '湖' : '');
+      if (label && o.cells.length) {
+        const groups = Geometry.connectedComponents(o.cells);
+        ctx.fillStyle = '#fff';
+        ctx.font = `600 ${cell * 0.45}px sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (const g of groups) {
+          let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+          for (const [r, c] of g) {
+            if (r < minR) minR = r; if (r > maxR) maxR = r;
+            if (c < minC) minC = c; if (c > maxC) maxC = c;
+          }
+          const cx = (minC + maxC + 1) / 2, cy = (minR + maxR + 1) / 2;
+          const [px, py] = toPx(cy, cx);
+          ctx.fillText(label, px, py);
+        }
+      }
+    }
+
+    // mines 2x2
+    for (const m of state.mines || []) {
+      let [mx, my] = toPx(m.row, m.col);
+      ctx.fillStyle = COLORS.mine;
+      ctx.fillRect(mx, my, 2 * cell, 2 * cell);
+      ctx.fillStyle = '#fff';
+      ctx.font = `600 ${cell * 0.5}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('矿', mx + cell, my + cell);
     }
 
     // bear 3x3
@@ -88,11 +116,15 @@ export const Renderer = {
       const cell0 = state.placement[p.id];
       if (!cell0) continue;
       let [x, y] = toPx(cell0[0], cell0[1]);
-      ctx.fillStyle = p.fixed ? COLORS.fixed : COLORS.player;
+      const dist = Geometry.distance(cell0, state.bear);
+      const ring = Math.max(0, Math.floor(dist / 2)) % COLORS.playerRings.length;
+      const bodyColor = p.fixed ? COLORS.fixed : COLORS.playerRings[ring];
+      const borderColor = p.fixed ? COLORS.fixed : COLORS.playerRingBorders[ring];
+      ctx.fillStyle = bodyColor;
       ctx.globalAlpha = 0.7;
       ctx.fillRect(x, y, 2 * cell, 2 * cell);
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = COLORS.playerBorder; ctx.lineWidth = 1;
+      ctx.strokeStyle = borderColor; ctx.lineWidth = 1;
       ctx.strokeRect(x, y, 2 * cell, 2 * cell);
       ctx.fillStyle = COLORS.text;
       ctx.font = `600 ${cell * 0.4}px sans-serif`;

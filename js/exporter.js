@@ -22,6 +22,8 @@ export const Exporter = {
         store.push();
         const state = store.get();
         Object.assign(state, obj);
+        if (!Array.isArray(state.mines)) state.mines = [];
+        if (!Array.isArray(state.obstacles)) state.obstacles = [];
         onLoaded();
       } catch (err) { alert('加载失败：' + err.message); }
     };

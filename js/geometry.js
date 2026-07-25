@@ -19,17 +19,23 @@ export const Geometry = {
     // obstacles
     for (const o of state.obstacles || [])
       for (const [r, c] of o.cells) add(r, c);
+    // mines 2x2
+    for (const m of state.mines || []) {
+      add(m.row, m.col); add(m.row, m.col + 1);
+      add(m.row + 1, m.col); add(m.row + 1, m.col + 1);
+    }
     // fixed players 2x2
     for (const [fr, fc] of occupiedByFixed || []) {
       add(fr, fc); add(fr, fc + 1); add(fr + 1, fc); add(fr + 1, fc + 1);
     }
     // buildable = map cells minus blocked. Map size computed by caller via computeView;
     // here we return blocked set inverted over a bounding region derived from state.
-    // Determine bounding region: union of bear, banners, obstacles, fixed, expanded by 8.
+    // Determine bounding region: union of bear, banners, obstacles, mines, fixed, expanded by 8.
     const rows = [], cols = [];
     for (let r = state.bear.row; r < state.bear.row + 3; r++) { rows.push(r); cols.push(state.bear.col); cols.push(state.bear.col+2); }
     for (const bn of state.banners || []) { rows.push(bn.row); cols.push(bn.col); }
     for (const o of state.obstacles || []) for (const [r,c] of o.cells) { rows.push(r); cols.push(c); }
+    for (const m of state.mines || []) { rows.push(m.row, m.row + 1); cols.push(m.col, m.col + 1); }
     for (const [fr, fc] of occupiedByFixed || []) { rows.push(fr); rows.push(fr+1); cols.push(fc); cols.push(fc+1); }
     const minR = Math.min(...rows) - 8, maxR = Math.max(...rows) + 8;
     const minC = Math.min(...cols) - 8, maxC = Math.max(...cols) + 8;
@@ -78,6 +84,7 @@ export const Geometry = {
       rows.push(cov.minRow, cov.maxRow); cols.push(cov.minCol, cov.maxCol);
     }
     for (const o of state.obstacles || []) for (const [r, c] of o.cells) { rows.push(r); cols.push(c); }
+    for (const m of state.mines || []) { rows.push(m.row, m.row + 1); cols.push(m.col, m.col + 1); }
     for (const [r, c] of placedPlayers || []) { rows.push(r, r + 1); cols.push(c, c + 1); }
     let minR = Math.min(...rows) - 1, maxR = Math.max(...rows) + 1;
     let minC = Math.min(...cols) - 1, maxC = Math.max(...cols) + 1;
@@ -112,17 +119,44 @@ export const Geometry = {
       for (let c = state.bear.col; c < state.bear.col + 3; c++) add(r, c);
     for (const bn of state.banners || []) add(bn.row, bn.col);
     for (const o of state.obstacles || []) for (const [r, c] of o.cells) add(r, c);
+    for (const m of state.mines || []) {
+      add(m.row, m.col); add(m.row, m.col + 1);
+      add(m.row + 1, m.col); add(m.row + 1, m.col + 1);
+    }
     for (const [fr, fc] of occupiedByFixed || []) {
       add(fr, fc); add(fr, fc + 1); add(fr + 1, fc); add(fr + 1, fc + 1);
     }
     return occ;
   },
 
+  connectedComponents(cells) {
+    const set = new Set(cells.map(([r, c]) => `${r},${c}`));
+    const seen = new Set();
+    const groups = [];
+    for (const [r, c] of cells) {
+      const key = `${r},${c}`;
+      if (seen.has(key)) continue;
+      const stack = [[r, c]];
+      const group = [];
+      seen.add(key);
+      while (stack.length) {
+        const [cr, cc] = stack.pop();
+        group.push([cr, cc]);
+        for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nk = `${cr + dr},${cc + dc}`;
+          if (set.has(nk) && !seen.has(nk)) { seen.add(nk); stack.push([cr + dr, cc + dc]); }
+        }
+      }
+      groups.push(group);
+    }
+    return groups;
+  },
+
   _footprint(kind, cell) {
     const [r, c] = cell;
     const cells = [];
     if (kind === 'banner' || kind === 'obstacle') cells.push([r, c]);
-    else if (kind === 'player') cells.push([r, c], [r, c + 1], [r + 1, c], [r + 1, c + 1]);
+    else if (kind === 'mine' || kind === 'player') cells.push([r, c], [r, c + 1], [r + 1, c], [r + 1, c + 1]);
     else if (kind === 'bear') {
       for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) cells.push([r + dr, c + dc]);
     }

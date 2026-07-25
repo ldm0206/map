@@ -4,6 +4,7 @@ const initial = () => ({
   bear: { row: 0, col: 0 },
   banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
   obstacles: [],
+  mines: [],
   players: [],
   placement: {},
   mode: 'strict',

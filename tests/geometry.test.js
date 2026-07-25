@@ -9,11 +9,12 @@ test('distance from player at bear center is small', () => {
   assert.ok(Math.abs(d - Math.hypot(2.5, 2.5)) < 1e-9);
 });
 
-test('buildableCells excludes bear, banner, obstacles', () => {
+test('buildableCells excludes bear, banner, obstacles, mines', () => {
   const state = {
     bear: { row: 0, col: 0 },
     banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
-    obstacles: [{ id: 'o1', type: 'mine', cells: [[5, 5]] }]
+    obstacles: [{ id: 'o1', type: 'mountain', cells: [[6, 6]] }],
+    mines: [{ id: 'm1', row: 5, col: 5 }]
   };
   const cells = Geometry.buildableCells(state, []);
   // bear cells rows0-2 cols0-2 not buildable
@@ -21,8 +22,13 @@ test('buildableCells excludes bear, banner, obstacles', () => {
   assert.equal(cells.has('2,2'), false);
   // banner cell not buildable
   assert.equal(cells.has('3,0'), false);
-  // mine not buildable
+  // mine 2x2 at (5,5) covers (5,5)(5,6)(6,5)(6,6)
   assert.equal(cells.has('5,5'), false);
+  assert.equal(cells.has('5,6'), false);
+  assert.equal(cells.has('6,5'), false);
+  assert.equal(cells.has('6,6'), false);
+  // mountain cell not buildable
+  assert.equal(cells.has('6,6'), false);
   // a free cell is buildable
   assert.equal(cells.has('3,3'), true);
 });
@@ -107,16 +113,19 @@ test('inCoverage true if covered by any banner', () => {
   assert.equal(Geometry.inCoverage([5, 5], banners), false);
 });
 
-test('occupiedCells unions bear, banners, obstacles, fixed players', () => {
+test('occupiedCells unions bear, banners, obstacles, mines, fixed players', () => {
   const state = {
     bear: { row: 0, col: 0 },
     banners: [{ id: 'b1', row: 3, col: 0, fixed: false }],
-    obstacles: [{ id: 'o1', type: 'mine', cells: [[5,5]] }]
+    obstacles: [{ id: 'o1', type: 'mountain', cells: [[7,7]] }],
+    mines: [{ id: 'm1', row: 5, col: 5 }]
   };
   const occ = Geometry.occupiedCells(state, [[4,4]]);
   assert.equal(occ.has('0,0'), true);   // bear
   assert.equal(occ.has('3,0'), true);   // banner
-  assert.equal(occ.has('5,5'), true);   // obstacle
+  assert.equal(occ.has('7,7'), true);   // mountain
+  assert.equal(occ.has('5,5'), true);   // mine
+  assert.equal(occ.has('6,6'), true);   // mine (2x2)
   assert.equal(occ.has('4,4'), true);   // fixed player
   assert.equal(occ.has('4,6'), false);  // free
 });

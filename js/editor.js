@@ -40,7 +40,18 @@ export const Editor = {
           store.push();
           state.banners.push({ id: 'b' + Date.now() + Math.random().toString(36).slice(2, 5), row: r, col: c, fixed: false });
         }
-      } else if (['mountain', 'lake', 'mine'].includes(tool)) {
+      } else if (tool === 'mine') {
+        state.mines = state.mines || [];
+        const hitMine = state.mines.find(m => r >= m.row && r <= m.row + 1 && c >= m.col && c <= m.col + 1);
+        if (hitMine) {
+          store.push();
+          const idx = state.mines.indexOf(hitMine);
+          if (idx >= 0) state.mines.splice(idx, 1);
+        } else if (Geometry.canPlaceEntity(state, fixedCells, 'mine', [r, c])) {
+          store.push();
+          state.mines.push({ id: 'm' + Date.now() + Math.random().toString(36).slice(2, 5), row: r, col: c });
+        }
+      } else if (['mountain', 'lake'].includes(tool)) {
         const occ = Geometry.occupiedCells(state, fixedCells);
         if (!occ.has(`${r},${c}`)) {
           store.push();

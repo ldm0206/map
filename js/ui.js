@@ -161,6 +161,7 @@ $('btn-reset') && $('btn-reset').addEventListener('click', () => {
   state.bear = { row: 0, col: 0 };
   state.banners = [{ id: 'b1', row: 3, col: 0, fixed: false }];
   state.obstacles = [];
+  state.mines = [];
   state.players = [];
   state.placement = {};
   lastOldPlacement = {};

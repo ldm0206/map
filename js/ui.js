@@ -167,4 +167,9 @@ $('btn-reset') && $('btn-reset').addEventListener('click', () => {
   render();
 });
 
+window.addEventListener('beforeunload', (event) => {
+  event.preventDefault();
+  event.returnValue = '';
+});
+
 render();

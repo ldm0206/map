@@ -2,16 +2,17 @@ import { Geometry } from './geometry.js';
 
 const COLORS = {
   grid: '#D6CDBB',
-  bear: '#8A3B2A',
-  banner: '#D4A24E',
-  coverage: 'rgba(212, 162, 78, 0.10)',
+  bear: '#7B2D26',
+  banner: '#E8B84B',
+  coverage: 'rgba(232, 184, 75, 0.10)',
   coverageBorder: '#C08A35',
-  mountain: '#8B8075',
-  lake: '#7A9AB5',
-  mine: '#9C6F3A',
-  player: '#C15A3C',
-  playerBorder: '#7A3524',
-  fixed: '#D4A24E',
+  mountain: '#6B7280',
+  lake: '#4A90D9',
+  mine: '#8B5CF6',
+  player: '#3D9970',
+  playerBorder: '#1F5C40',
+  playerIdText: 'rgba(31, 26, 20, 0.55)',
+  fixed: '#F59E0B',
   text: '#1F1A14'
 };
 
@@ -93,9 +94,15 @@ export const Renderer = {
       ctx.globalAlpha = 1;
       ctx.strokeStyle = COLORS.playerBorder; ctx.lineWidth = 1;
       ctx.strokeRect(x, y, 2 * cell, 2 * cell);
-      ctx.fillStyle = COLORS.text; ctx.font = `${cell * 0.25}px sans-serif`;
-      ctx.fillText(p.name, x + cell, y + cell * 0.5);
-      ctx.fillText(`#${p.priority}`, x + cell, y + cell * 1.4);
+      ctx.fillStyle = COLORS.text;
+      ctx.font = `600 ${cell * 0.4}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.name, x + cell, y + cell * 0.85);
+      ctx.fillStyle = COLORS.playerIdText;
+      ctx.font = `${cell * 0.18}px sans-serif`;
+      ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillText(`#${p.priority}`, x + 2 * cell - 3, y + 2 * cell - 2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     }
   }
 };

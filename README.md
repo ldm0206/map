@@ -41,6 +41,7 @@ python -m http.server 8000
 
 ```
 index.html        页面骨架（三栏布局）
+style.css         Claude 风格设计令牌 + 组件样式
 js/geometry.js    候选格、距离、冲突检测、地图扩张（单测）
 js/strictSolver.js   严格模式贪心（单测）
 js/minimalSolver.js  最小修改匈牙利算法（单测）

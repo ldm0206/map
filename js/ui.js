@@ -79,6 +79,7 @@ function renderPlayerList() {
     p.fixed = e.target.checked;
     if (p.fixed && state.placement[p.id]) p.fixedCell = state.placement[p.id];
     if (!p.fixed) p.fixedCell = null;
+    render();
   }));
   ul.querySelectorAll('.pdel').forEach(b => b.addEventListener('click', (e) => {
     const state = store.get();
